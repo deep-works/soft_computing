@@ -1,0 +1,35 @@
+import random
+
+def genetic_algorithm():
+  pop_size = int(input("Enter population size:"))
+  chrom_length = int(input("Enter chromosome length:"))
+  generations = int(input("Enter the number of generations:"))
+  mutation_rate = float(input("Enter mutation rate (eg- 0.1 is 10%):"))
+
+
+  decode = lambda ch: int(ch, 2)
+  fitness = lambda ch: decode(ch) ** 2
+  generate_chromosome = lambda length: ''.join(random.choice('01') for _ in range(length))
+
+  pop = [generate_chromosome(chrom_length) for _ in range(pop_size)]
+
+  for gen in range(generations):
+    print(f"\n\nGeneration {gen}:")
+    [print(f"Chromosome: {ch}, x = {decode(ch):2}, fitness = {fitness(ch)}") for ch in pop]
+
+    total_fitness = sum(fitness(ch) for ch in pop)
+    probs = [fitness(ch)/total_fitness for ch in pop] 
+
+    new_pop = []
+    while len(new_pop) < pop_size:
+      parent1, parent2 = random.choices(pop, weights = probs, k = 2)
+      point = random.randint(1, chrom_length - 1)
+      child1, child2 = parent1[:point] + parent2[point:], parent2[:point] + parent1[point:]
+
+      mutate = lambda ch, rate: ''.join(bit if random.random() > rate else str(1 - int(bit)) for bit in ch)
+      child1, child2 = mutate(child1, mutation_rate), mutate(child2, mutation_rate)
+      new_pop.extend([child1, child2])
+
+    pop = sorted(new_pop[:pop_size], key = fitness, reverse =  True)
+
+genetic_algorithm()
