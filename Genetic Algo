@@ -1,0 +1,39 @@
+import random
+
+def decode(chromosome):
+    return int(chromosome, 2)
+
+def fitness(chromosome):
+    return decode(chromosome) ** 2
+
+def generate_chromosome(length=5):
+    return ''.join(random.choice('01') for _ in range(length))
+
+def select(population):
+    total = sum(fitness(ch) for ch in population)
+    probs = [fitness(ch)/total for ch in population]
+    return random.choices(population, weights=probs, k=2)
+
+def crossover(p1, p2):
+    point = random.randint(1, len(p1) - 1)
+    return p1[:point] + p2[point:], p2[:point] + p1[point:]
+
+def mutate(ch, rate=0.1):
+    return ''.join(bit if random.random() > rate else str(1 - int(bit)) for bit in ch)
+
+def genetic_algorithm():
+    pop = [generate_chromosome() for _ in range(4)]
+    for gen in range(10):
+        print(f"\nGeneration {gen}:")
+        for ch in pop:
+            print(f"Chromosome: {ch}, x = {decode(ch):2}, fitness = {fitness(ch)}")
+
+        new_pop = []
+        while len(new_pop) < len(pop):
+            p1, p2 = select(pop)
+            c1, c2 = crossover(p1, p2)
+            c1, c2 = mutate(c1), mutate(c2)
+            new_pop.extend([c1, c2])
+        pop = sorted(new_pop[:len(pop)], key=fitness, reverse=True)
+
+genetic_algorithm()
